@@ -1,0 +1,50 @@
+{% set configs = [
+    {
+        "table" : "AIRBNB.SILVER.SILVER_BOOKINGS",
+        "columns" : "SILVER_bookings.*",
+        "alias" : "SILVER_bookings"
+    },
+    { 
+        "table" : "AIRBNB.SILVER.SILVER_LISTINGS",
+        "alias" : "SILVER_listings",
+        "columns" : "SILVER_listings.HOST_ID,
+                     SILVER_listings.PROPERTY_TYPE,
+                     SILVER_listings.ROOM_TYPE,
+                     SILVER_listings.CITY,
+                     SILVER_listings.COUNTRY,
+                     SILVER_listings.ACCOMMODATES,
+                     SILVER_listings.BEDROOMS,
+                     SILVER_listings.BATHROOMS,
+                     SILVER_listings.PRICE_PER_NIGHT,
+                     silver_listings.BUDGET_TYPE,
+                     SILVER_listings.CREATED_AT AS LISTING_CREATED_AT",
+        "join_condition" : "SILVER_bookings.listing_id = SILVER_listings.listing_id"
+    },
+    {
+        "table" : "AIRBNB.SILVER.SILVER_HOSTS",
+        "alias" : "SILVER_hosts",
+        "columns" : "SILVER_hosts.HOST_NAME,
+                     SILVER_hosts.HOST_SINCE,
+                     SILVER_hosts.IS_SUPERHOST,
+                     SILVER_hosts.RESPONSE_RATE,
+                     SILVER_hosts.RESPONSIVENESS,
+                     SILVER_hosts.HOST_CREATED_AT",
+        "join_condition" : "SILVER_listings.host_id = SILVER_hosts.host_id"
+    }
+] %}
+
+
+
+SELECT 
+    {% for config in configs %}
+        {{ config['columns'] }}{% if not loop.last %},{% endif %}
+    {% endfor %}
+FROM
+    {% for config in configs %}
+    {% if loop.first %}
+      {{ config['table'] }} AS {{ config['alias'] }}
+    {% else %}
+        LEFT JOIN {{ config['table'] }} AS {{ config['alias'] }}
+        ON {{ config['join_condition'] }}
+        {% endif %}
+        {% endfor %}
